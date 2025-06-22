@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo Application</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .todo-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+            padding: 2rem;
+        }
+
+        .todo-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .todo-header h1 {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .todo-header p {
+            color: #666;
+            margin: 0;
+        }
+
+        .add-todo-form {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .add-todo-form:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .todo-input {
+            border: none;
+            background: transparent;
+            font-size: 1.1rem;
+            padding: 0.5rem 0;
+        }
+
+        .todo-input:focus {
+            box-shadow: none;
+            background: transparent;
+        }
+
+        .btn-add {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .todo-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .todo-item {
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            padding: 1.25rem;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .todo-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .todo-item.completed {
+            background: #f8f9fa;
+            opacity: 0.7;
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+
+        .todo-text {
+            font-size: 1.1rem;
+            margin: 0;
+            color: #333;
+            word-wrap: break-word;
+        }
+
+        .todo-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-action {
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-complete {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-complete:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-edit:hover {
+            background: #e0a800;
+            transform: scale(1.05);
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .btn-save {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #138496;
+            transform: scale(1.05);
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+            transform: scale(1.05);
+        }
+
+        .edit-input {
+            border: 2px solid #17a2b8;
+            border-radius: 8px;
+            padding: 0.5rem;
+            font-size: 1.1rem;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .edit-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .todo-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="todo-container">
+                    <div class="todo-header">
+                        <h1><i class="fas fa-list"></i> My Todo List</h1>
+                        <p>Stay organized and get things done!</p>
+                    </div>
+
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-number" id="totalTasks">0</div>
+                            <div class="stat-label">Total Tasks</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number" id="completedTasks">0</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number" id="pendingTasks">0</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                    </div>
+
+                    <div class="add-todo-form">
+                        <div class="d-flex gap-2">
+                            <input type="text" class="form-control todo-input" id="todoInput"
+                                placeholder="What needs to be done?" maxlength="200">
+                            <button class="btn btn-add" id="addBtn">
+                                <i class="fas fa-plus"></i> Add Task
+                            </button>
+                        </div>
+                    </div>
+
+                    <ul class="todo-list" id="todoList">
+                        <div class="empty-state" id="emptyState">
+                            <i class="fas fa-clipboard-list"></i>
+                            <h4>No todos yet!</h4>
+                            <p>Add your first task above to get started.</p>
+                        </div>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class TodoApp {
+            constructor() {
+                this.todos = [];
+                this.nextId = 1;
+                this.editingId = null;
+
+                this.todoInput = document.getElementById('todoInput');
+                this.addBtn = document.getElementById('addBtn');
+                this.todoList = document.getElementById('todoList');
+                this.emptyState = document.getElementById('emptyState');
+                this.totalTasks = document.getElementById('totalTasks');
+                this.completedTasks = document.getElementById('completedTasks');
+                this.pendingTasks = document.getElementById('pendingTasks');
+
+                this.init();
+            }
+
+            init() {
+                this.addBtn.addEventListener('click', () => this.addTodo());
+                this.todoInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.addTodo();
+                });
+
+                this.updateDisplay();
+            }
+
+            addTodo() {
+                const text = this.todoInput.value.trim();
+                if (!text) return;
+
+                const todo = {
+                    id: this.nextId++,
+                    text: text,
+                    completed: false,
+                    createdAt: new Date()
+                };
+
+                this.todos.push(todo);
+                this.todoInput.value = '';
+                this.updateDisplay();
+            }
+
+            toggleComplete(id) {
+                const todo = this.todos.find(t => t.id === id);
+                if (todo) {
+                    todo.completed = !todo.completed;
+                    this.updateDisplay();
+                }
+            }
+
+            deleteTodo(id) {
+                this.todos = this.todos.filter(t => t.id !== id);
+                this.updateDisplay();
+            }
+
+            startEdit(id) {
+                this.editingId = id;
+                this.updateDisplay();
+            }
+
+            saveEdit(id, newText) {
+                const todo = this.todos.find(t => t.id === id);
+                if (todo && newText.trim()) {
+                    todo.text = newText.trim();
+                }
+                this.editingId = null;
+                this.updateDisplay();
+            }
+
+            cancelEdit() {
+                this.editingId = null;
+                this.updateDisplay();
+            }
+
+            updateStats() {
+                const total = this.todos.length;
+                const completed = this.todos.filter(t => t.completed).length;
+                const pending = total - completed;
+
+                this.totalTasks.textContent = total;
+                this.completedTasks.textContent = completed;
+                this.pendingTasks.textContent = pending;
+            }
+
+            renderTodo(todo) {
+                const isEditing = this.editingId === todo.id;
+
+                if (isEditing) {
+                    return `
+                        <li class="todo-item">
+                            <input type="text" 
+                                   class="edit-input" 
+                                   value="${todo.text}" 
+                                   id="editInput${todo.id}"
+                                   maxlength="200">
+                            <div class="todo-actions">
+                                <button class="btn-action btn-save" onclick="todoApp.saveEdit(${todo.id}, document.getElementById('editInput${todo.id}').value)">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                                <button class="btn-action btn-cancel" onclick="todoApp.cancelEdit()">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </div>
+                        </li>
+                    `;
+                }
+
+                return `
+                    <li class="todo-item ${todo.completed ? 'completed' : ''}">
+                        <p class="todo-text">${todo.text}</p>
+                        <div class="todo-actions">
+                            <button class="btn-action btn-complete" onclick="todoApp.toggleComplete(${todo.id})">
+                                <i class="fas fa-${todo.completed ? 'undo' : 'check'}"></i> 
+                                ${todo.completed ? 'Undo' : 'Complete'}
+                            </button>
+                            <button class="btn-action btn-edit" onclick="todoApp.startEdit(${todo.id})">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn-action btn-delete" onclick="todoApp.deleteTodo(${todo.id})">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </li>
+                `;
+            }
+
+            updateDisplay() {
+                this.updateStats();
+
+                if (this.todos.length === 0) {
+                    this.emptyState.style.display = 'block';
+                    this.todoList.innerHTML = this.emptyState.outerHTML;
+                } else {
+                    this.emptyState.style.display = 'none';
+                    this.todoList.innerHTML = this.todos.map(todo => this.renderTodo(todo)).join('');
+
+                    // Focus on edit input if editing
+                    if (this.editingId) {
+                        const editInput = document.getElementById(`editInput${this.editingId}`);
+                        if (editInput) {
+                            editInput.focus();
+                            editInput.select();
+
+                            // Add enter key support for save
+                            editInput.addEventListener('keypress', (e) => {
+                                if (e.key === 'Enter') {
+                                    this.saveEdit(this.editingId, editInput.value);
+                                } else if (e.key === 'Escape') {
+                                    this.cancelEdit();
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        // Initialize the app
+        const todoApp = new TodoApp();
+    </script>
+</body>
+
+</html>
