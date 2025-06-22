@@ -8,57 +8,232 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --body-bg-light: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); /* Light, airy blue gradient */
+            --body-bg-dark: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%); /* Deep, sophisticated dark blue/grey */
+            --container-bg-light: rgba(255, 255, 255, 0.9); /* Slightly more transparent */
+            --container-bg-dark: rgba(40, 44, 52, 0.95); /* Darker container */
+            --text-color-light: #333;
+            --text-color-dark: #f0f0f0; /* Light gray for dark mode text */
+            --muted-text-light: #666;
+            --muted-text-dark: #aaa;
+            --card-bg-light: #f8f9fa;
+            --card-bg-dark: #282c34; /* Even darker for cards/forms */
+            --input-border-light: #e9ecef;
+            --input-border-dark: #444951;
+            --input-focus-border-light: #66a6ff; /* Match new light gradient */
+            --input-focus-border-dark: #82aaff; /* Soft blue for dark focus */
+            --button-primary-bg-light: linear-gradient(45deg, #66a6ff, #89f7fe); /* Reversed light blue gradient for buttons */
+            --button-primary-bg-dark: linear-gradient(45deg, #2c5364, #203a43); /* Match dark gradient for buttons */
+            --button-text-color: white;
+            --todo-item-bg-light: #ffffff; /* Pure white for items */
+            --todo-item-bg-dark: #31363f; /* Darker items */
+            --todo-item-border-light: #e9ecef;
+            --todo-item-border-dark: #4a4f58;
+            --todo-item-completed-bg-light: #f8f9fa;
+            --todo-item-completed-bg-dark: #2a2e35;
+            --todo-item-completed-opacity: 0.7;
+            --todo-item-completed-text-light: #6c757d;
+            --todo-item-completed-text-dark: #888;
+            --shadow-light: 0 10px 30px rgba(0, 0, 0, 0.08); /* Softer shadow for light */
+            --shadow-dark: 0 15px 35px rgba(0, 0, 0, 0.25); /* Slightly softer but still prominent for dark */
+            --primary-accent: #66a6ff; /* Match new light gradient */
+            --primary-accent-dark: #82aaff; /* Match new dark focus */
+            --table-bg-light: var(--todo-item-bg-light);
+            --table-bg-dark: var(--card-bg-dark);
+            --table-striped-bg-light: rgba(0,0,0,.02);
+            --table-striped-bg-dark: rgba(255,255,255,.03);
+            --table-hover-bg-light: rgba(0,0,0,.04);
+            --table-hover-bg-dark: rgba(255,255,255,.05);
+            --table-border-light: #dee2e6;
+            --table-border-dark: #454d55;
+            --table-text-light: #212529;
+            --table-text-dark: var(--text-color-dark);
+            --table-header-bg-light: #f0f8ff; /* AliceBlue - very light blue for header */
+            --table-header-bg-dark: #2c3e50; /* Dark slate blue for dark header */
+            --link-color-light: var(--primary-accent);
+            --link-color-dark: var(--primary-accent-dark);
+            --link-hover-light: #5090e0; /* Slightly darker blue for hover */
+            --link-hover-dark: #9bbfff;
+            --switch-bg-light: #bdc3c7; /* Lighter grey for switch */
+            --switch-bg-dark: #7f8c8d; /* Darker grey for switch */
+            --switch-slider-light: white;
+            --switch-slider-dark: #ecf0f1; /* Light grey slider for dark mode */
+            --switch-checked-bg-light: var(--primary-accent);
+            --switch-checked-bg-dark: var(--primary-accent-dark);
+            --animation-duration: 0.3s;
+            --animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1); /* Smoother timing function */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--body-bg-light);
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Changed font */
+            color: var(--text-color-light);
+            transition: background var(--animation-duration) var(--animation-timing-function), color var(--animation-duration) var(--animation-timing-function);
+            font-size: 16px; /* Base font size */
+            line-height: 1.6; /* Improved line height */
+        }
+        body.dark-mode {
+            background: var(--body-bg-dark);
+            color: var(--text-color-dark);
         }
 
         .todo-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            margin-top: 2rem;
-            padding: 2rem;
+            background: var(--container-bg-light);
+            backdrop-filter: blur(12px); /* Slightly more blur */
+            border-radius: 25px; /* Softer radius */
+            box-shadow: var(--shadow-light);
+            margin-top: 2.5rem; /* More spacing from top */
+            padding: 2.5rem; /* More internal padding */
+            transition: background var(--animation-duration) var(--animation-timing-function), box-shadow var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .todo-container {
+            background: var(--container-bg-dark);
+            box-shadow: var(--shadow-dark);
         }
 
         .todo-header {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: #333;
+            margin-bottom: 2.5rem; /* More spacing */
+            color: var(--text-color-light);
         }
+        body.dark-mode .todo-header {
+            color: var(--text-color-dark);
+        }
+        .todo-header .form-check-input {
+            background-color: var(--switch-bg-light);
+            border-color: var(--switch-bg-light); /* Ensure border matches */
+            width: 3.2em;
+            height: 1.6em;
+            border-radius: 1.6em;
+            transition: background-color var(--animation-duration) var(--animation-timing-function), border-color var(--animation-duration) var(--animation-timing-function);
+            -webkit-appearance: none; /* Remove default appearance */
+            appearance: none;
+            position: relative;
+            cursor: pointer;
+        }
+         .todo-header .form-check-input::before {
+            content: "";
+            position: absolute;
+            top: 0.2em;
+            left: 0.2em;
+            width: 1.2em;
+            height: 1.2em;
+            border-radius: 50%;
+            background-color: var(--switch-slider-light);
+            transition: transform var(--animation-duration) var(--animation-timing-function), background-color var(--animation-duration) var(--animation-timing-function);
+        }
+        .todo-header .form-check-input:checked {
+            background-color: var(--switch-checked-bg-light);
+            border-color: var(--switch-checked-bg-light); /* Ensure border matches */
+        }
+         .todo-header .form-check-input:checked::before {
+            transform: translateX(1.6em);
+            background-color: var(--switch-slider-light);
+        }
+
+        .todo-header .form-check-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(102, 166, 255, 0.35);
+        }
+        body.dark-mode .todo-header .form-check-input {
+            background-color: var(--switch-bg-dark);
+            border-color: var(--switch-bg-dark); /* Ensure border matches */
+        }
+        body.dark-mode .todo-header .form-check-input::before {
+            background-color: var(--switch-slider-dark);
+        }
+        body.dark-mode .todo-header .form-check-input:checked {
+            background-color: var(--switch-checked-bg-dark);
+            border-color: var(--switch-checked-bg-dark); /* Ensure border matches */
+        }
+        body.dark-mode .todo-header .form-check-input:checked::before {
+            background-color: var(--switch-slider-dark);
+        }
+        body.dark-mode .todo-header .form-check-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(130, 170, 255, 0.35);
+        }
+        .todo-header .form-check-label i {
+            font-size: 1.35rem;
+            color: var(--primary-accent);
+            transition: color var(--animation-duration) var(--animation-timing-function);
+            vertical-align: middle; /* Align icon with switch */
+        }
+        body.dark-mode .todo-header .form-check-label i {
+            color: var(--primary-accent-dark);
+        }
+        .todo-header .form-check.form-switch {
+            padding-left: 0; /* Remove default padding if custom styling switch */
+            display: flex; /* Align switch and icon nicely */
+            align-items: center;
+        }
+        .todo-header .form-check.form-switch .form-check-input {
+            margin-left: 0; /* Reset margin if needed */
+            margin-right: 0.5em; /* Space between switch and icon */
+        }
+
 
         .todo-header h1 {
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            font-size: 2.25rem;
+            margin-bottom: 0.25rem;
         }
 
         .todo-header p {
-            color: #666;
+            color: var(--muted-text-light);
             margin: 0;
+            font-size: 0.95rem;
+            transition: color var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .todo-header p {
+            color: var(--muted-text-dark);
         }
 
         .add-todo-form {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border: 2px solid #e9ecef;
-            transition: all 0.3s ease;
+            background: var(--card-bg-light);
+            border-radius: 18px;
+            padding: 1.75rem;
+            margin-bottom: 2.5rem;
+            border: 1px solid var(--input-border-light);
+            transition: background var(--animation-duration) var(--animation-timing-function), border-color var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .add-todo-form {
+            background: var(--card-bg-dark);
+            border: 1px solid var(--input-border-dark);
         }
 
         .add-todo-form:focus-within {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            border-color: var(--input-focus-border-light);
+            box-shadow: 0 0 0 0.2rem rgba(102, 166, 255, 0.25);
+        }
+        body.dark-mode .add-todo-form:focus-within {
+            border-color: var(--input-focus-border-dark);
+            box-shadow: 0 0 0 0.2rem rgba(130, 170, 255, 0.25);
         }
 
         .todo-input {
             border: none;
             background: transparent;
-            font-size: 1.1rem;
-            padding: 0.5rem 0;
+            font-size: 1.15rem;
+            padding: 0.6rem 0;
+            color: var(--text-color-light);
+            transition: color var(--animation-duration) var(--animation-timing-function);
         }
+        body.dark-mode .todo-input {
+            color: var(--text-color-dark);
+        }
+        .todo-input::placeholder {
+            color: var(--muted-text-light);
+            transition: color var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .todo-input::placeholder {
+            color: var(--muted-text-dark);
+        }
+
 
         .todo-input:focus {
             box-shadow: none;
@@ -66,20 +241,28 @@
         }
 
         .btn-add {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: var(--button-primary-bg-light);
             border: none;
-            border-radius: 10px;
-            padding: 0.75rem 1.5rem;
-            color: white;
+            border-radius: 12px;
+            padding: 0.85rem 1.75rem;
+            color: var(--button-text-color);
             font-weight: 600;
-            transition: all 0.3s ease;
+            letter-spacing: 0.5px; /* Added letter spacing */
+            transition: background var(--animation-duration) var(--animation-timing-function), transform 0.2s var(--animation-timing-function), box-shadow var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .btn-add {
+            background: var(--button-primary-bg-dark);
+            color: var(--text-color-dark);
         }
 
         .btn-add:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-            color: white;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 18px rgba(102, 166, 255, 0.45);
         }
+        body.dark-mode .btn-add:hover {
+            box-shadow: 0 6px 18px rgba(44, 83, 100, 0.55);
+        }
+
 
         .todo-list {
             list-style: none;
@@ -87,36 +270,58 @@
         }
 
         .todo-item {
-            background: white;
-            border-radius: 15px;
-            margin-bottom: 1rem;
-            padding: 1.25rem;
-            border: 1px solid #e9ecef;
-            transition: all 0.3s ease;
+            background: var(--todo-item-bg-light);
+            border-radius: 18px;
+            margin-bottom: 1.2rem;
+            padding: 1.4rem;
+            border: 1px solid var(--todo-item-border-light);
+            transition: background var(--animation-duration) var(--animation-timing-function),
+                        border-color var(--animation-duration) var(--animation-timing-function),
+                        transform 0.2s var(--animation-timing-function),
+                        box-shadow var(--animation-duration) var(--animation-timing-function),
+                        opacity var(--animation-duration) var(--animation-timing-function);
             position: relative;
             overflow: hidden;
+            animation: fadeIn 0.5s var(--animation-timing-function);
         }
+        body.dark-mode .todo-item {
+            background: var(--todo-item-bg-dark);
+            border: 1px solid var(--todo-item-border-dark);
+        }
+
 
         .todo-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: var(--shadow-light);
+        }
+        body.dark-mode .todo-item:hover {
+            box-shadow: var(--shadow-dark);
         }
 
+
         .todo-item.completed {
-            background: #f8f9fa;
-            opacity: 0.7;
+            background: var(--todo-item-completed-bg-light);
+            opacity: var(--todo-item-completed-opacity);
+        }
+        body.dark-mode .todo-item.completed {
+            background: var(--todo-item-completed-bg-dark);
         }
 
         .todo-item.completed .todo-text {
             text-decoration: line-through;
-            color: #6c757d;
+            color: var(--todo-item-completed-text-light);
+            transition: color var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .todo-item.completed .todo-text {
+            color: var(--todo-item-completed-text-dark);
         }
 
+
         .todo-text {
-            font-size: 1.1rem;
+            font-size: 1.05rem; /* Adjusted if base font size changed */
             margin: 0;
-            color: #333;
             word-wrap: break-word;
+            transition: color var(--animation-duration) var(--animation-timing-function);
         }
 
         .todo-actions {
@@ -131,14 +336,43 @@
             padding: 0.5rem 1rem;
             font-size: 0.9rem;
             font-weight: 500;
-            transition: all 0.3s ease;
+            transition: background-color var(--animation-duration) var(--animation-timing-function),
+                        color var(--animation-duration) var(--animation-timing-function),
+                        transform 0.2s var(--animation-timing-function),
+                        box-shadow var(--animation-duration) var(--animation-timing-function);
             cursor: pointer;
         }
+        .btn-action:hover {
+            transform: scale(1.05); /* Keep consistent hover scale */
+        }
+        /* Specific button colors will be handled by Bootstrap or overridden if needed for dark mode */
+        body.dark-mode .btn-edit {
+            background: #b38600; /* Darker yellow */
+            color: #f0f0f0;
+        }
+        body.dark-mode .btn-edit:hover {
+            background: #997400;
+        }
+
 
         .btn-complete {
             background: #28a745;
             color: white;
         }
+        body.dark-mode .btn-complete { /* Assuming this is for "Complete" action */
+            background: #1e7e34; /* Darker green */
+        }
+        body.dark-mode .btn-complete:hover {
+             background: #155b25;
+        }
+        /* Style for "Undo" button (typically .btn-info or similar if it has different text) */
+        body.dark-mode .btn-info { /* Bootstrap's default info, or a custom class for "Undo" */
+            background-color: #138496; /* Default BS info */
+        }
+        body.dark-mode .btn-info:hover {
+            background-color: #117a8b;
+        }
+
 
         .btn-complete:hover {
             background: #218838;
@@ -159,6 +393,12 @@
             background: #dc3545;
             color: white;
         }
+        body.dark-mode .btn-delete {
+            background: #b02a37; /* Darker red */
+        }
+        body.dark-mode .btn-delete:hover {
+            background: #90212c;
+        }
 
         .btn-delete:hover {
             background: #c82333;
@@ -166,9 +406,16 @@
         }
 
         .btn-save {
-            background: #17a2b8;
+            background: #17a2b8; /* Typically info color */
             color: white;
         }
+        body.dark-mode .btn-save {
+            background: #117a8b; /* Darker info */
+        }
+        body.dark-mode .btn-save:hover {
+            background: #0f6674;
+        }
+
 
         .btn-save:hover {
             background: #138496;
@@ -176,8 +423,14 @@
         }
 
         .btn-cancel {
-            background: #6c757d;
+            background: #6c757d; /* Secondary color */
             color: white;
+        }
+        body.dark-mode .btn-cancel {
+            background: #545b62; /* Darker secondary */
+        }
+        body.dark-mode .btn-cancel:hover {
+            background: #43484d;
         }
 
         .btn-cancel:hover {
@@ -186,23 +439,37 @@
         }
 
         .edit-input {
-            border: 2px solid #17a2b8;
+            border: 2px solid var(--input-focus-border-light); /* Use focus color for consistency */
             border-radius: 8px;
             padding: 0.5rem;
             font-size: 1.1rem;
             width: 100%;
             margin-bottom: 1rem;
+            background-color: var(--todo-item-bg-light); /* Match item bg */
+            color: var(--text-color-light);
         }
+        body.dark-mode .edit-input {
+            border: 2px solid var(--input-focus-border-dark);
+            background-color: var(--todo-item-bg-dark);
+            color: var(--text-color-dark);
+        }
+
 
         .edit-input:focus {
             outline: none;
-            box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25); /* Using the save button color for focus */
+        }
+        body.dark-mode .edit-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(17, 122, 139, 0.35);
         }
 
         .empty-state {
             text-align: center;
             padding: 3rem 1rem;
-            color: #6c757d;
+            color: var(--muted-text-light);
+        }
+        body.dark-mode .empty-state {
+            color: var(--muted-text-dark);
         }
 
         .empty-state i {
@@ -214,10 +481,14 @@
         .stats {
             display: flex;
             justify-content: space-around;
-            background: #f8f9fa;
+            background: var(--card-bg-light);
             border-radius: 15px;
             padding: 1rem;
             margin-bottom: 2rem;
+            transition: background var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .stats {
+            background: var(--card-bg-dark);
         }
 
         .stat {
@@ -227,14 +498,23 @@
         .stat-number {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #667eea;
+            color: var(--primary-accent);
+            transition: color var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .stat-number {
+            color: var(--primary-accent-dark);
         }
 
         .stat-label {
             font-size: 0.9rem;
-            color: #6c757d;
+            color: var(--muted-text-light);
             margin-top: 0.25rem;
+            transition: color var(--animation-duration) var(--animation-timing-function);
         }
+        body.dark-mode .stat-label {
+            color: var(--muted-text-dark);
+        }
+
 
         @media (max-width: 768px) {
             .todo-container {
@@ -255,48 +535,146 @@
 
         .table th, .table td {
             vertical-align: middle;
+            border-color: var(--table-border-light);
+            color: var(--table-text-light);
         }
+        body.dark-mode .table th, body.dark-mode .table td {
+            border-color: var(--table-border-dark);
+            color: var(--table-text-dark);
+        }
+        .table thead th {
+            background-color: var(--table-header-bg-light);
+        }
+        body.dark-mode .table thead th {
+            background-color: var(--table-header-bg-dark);
+        }
+
+
+        .table-striped > tbody > tr:nth-of-type(odd) > * {
+            background-color: var(--table-striped-bg-light); /* BS uses rgba, so this is an approximation */
+        }
+        body.dark-mode .table-striped > tbody > tr:nth-of-type(odd) > * {
+            background-color: var(--table-striped-bg-dark);
+        }
+
+        .table-hover > tbody > tr:hover > * {
+            background-color: var(--table-hover-bg-light);
+        }
+        body.dark-mode .table-hover > tbody > tr:hover > * {
+            background-color: var(--table-hover-bg-dark);
+        }
+
+        /* Table success (completed row) styling */
+        .table-light { /* Bootstrap class for light backgrounds in tables */
+             --bs-table-bg: var(--todo-item-completed-bg-light);
+             --bs-table-striped-bg: var(--todo-item-completed-bg-light); /* Ensure striped doesn't override */
+        }
+        body.dark-mode .table-light { /* Re-purpose for our completed style in dark mode */
+            --bs-table-bg: var(--todo-item-completed-bg-dark);
+            --bs-table-striped-bg: var(--todo-item-completed-bg-dark);
+            color: var(--todo-item-completed-text-dark) !important; /* Ensure text color is also muted */
+        }
+        body.dark-mode .table-light td, body.dark-mode .table-light th {
+            color: var(--todo-item-completed-text-dark) !important;
+        }
+        body.dark-mode .table-light .badge { /* Make badge less prominent on completed dark rows */
+            opacity: 0.7;
+        }
+
 
         .badge {
             font-size: 0.9em;
         }
+        /* Badge colors are generally fine with Bootstrap defaults, but can be tweaked if needed */
+        body.dark-mode .bg-success {
+            background-color: #1e7e34 !important; /* Ensure it's visible on dark bg */
+        }
+        body.dark-mode .bg-warning {
+            background-color: #b38600 !important;
+            color: #1a1a1a !important; /* Dark text for yellow badge */
+        }
+
 
         .edit-input.form-control { /* Ensure table edit input is styled consistently */
             margin-bottom: 0.5rem !important; /* Override general edit-input margin if needed */
+            /* Dark mode for this already handled by general .edit-input rules */
         }
 
         .pagination .page-link {
-            color: #667eea;
+            color: var(--link-color-light);
             border-radius: 0.25rem; /* Softer edges for pagination items */
             margin: 0 2px; /* Spacing between pagination buttons */
+            background-color: var(--todo-item-bg-light); /* Match item bg */
+            border: 1px solid var(--input-border-light);
+        }
+        body.dark-mode .pagination .page-link {
+            color: var(--link-color-dark);
+            background-color: var(--todo-item-bg-dark);
+            border: 1px solid var(--input-border-dark);
         }
 
         .pagination .page-link:hover {
-            color: #4a5fc4;
-            background-color: #e9ecef;
+            color: var(--link-hover-light);
+            background-color: #e9ecef; /* Standard hover color */
+        }
+        body.dark-mode .pagination .page-link:hover {
+            color: var(--link-hover-dark);
+            background-color: #3a3f47; /* Darker hover */
         }
 
         .pagination .page-item.active .page-link {
-            background-color: #667eea;
-            border-color: #667eea;
+            background-color: var(--primary-accent);
+            border-color: var(--primary-accent);
             color: white;
+        }
+        body.dark-mode .pagination .page-item.active .page-link {
+            background-color: var(--primary-accent-dark);
+            border-color: var(--primary-accent-dark);
         }
 
         .pagination .page-item.disabled .page-link {
-            color: #6c757d;
-            background-color: #fff;
-            border-color: #dee2e6;
+            color: var(--muted-text-light);
+            background-color: var(--todo-item-bg-light);
+            border-color: var(--input-border-light);
+        }
+        body.dark-mode .pagination .page-item.disabled .page-link {
+            color: var(--muted-text-dark);
+            background-color: var(--todo-item-bg-dark);
+            border-color: var(--input-border-dark);
         }
 
+
         #toggleViewBtn {
-            background-color: #6c757d;
+            background-color: #6c757d; /* Bootstrap secondary */
             border-color: #6c757d;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
+            color: white;
+            transition: background-color var(--animation-duration) var(--animation-timing-function), border-color var(--animation-duration) var(--animation-timing-function), transform 0.2s var(--animation-timing-function);
         }
+        body.dark-mode #toggleViewBtn {
+            background-color: #545b62; /* Darker secondary */
+            border-color: #545b62;
+        }
+
         #toggleViewBtn:hover {
             background-color: #5a6268;
             border-color: #545b62;
+            transform: translateY(-2px);
         }
+        body.dark-mode #toggleViewBtn:hover {
+            background-color: #43484d;
+            border-color: #3b4045;
+            transform: translateY(-2px);
+        }
+
+        /* General hover effect for all buttons for consistency if not already scaled by btn-action */
+        .btn:hover:not(.btn-action) { /* Avoid double scaling on btn-action */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        body.dark-mode .btn:hover:not(.btn-action) {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
 
     </style>
 </head>
@@ -307,8 +685,16 @@
             <div class="col-lg-8 col-md-10">
                 <div class="todo-container">
                     <div class="todo-header">
-                        <h1><i class="fas fa-list"></i> My Todo List</h1>
-                        <p>Stay organized and get things done!</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h1><i class="fas fa-list"></i> My Todo List</h1>
+                                <p>Stay organized and get things done!</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="themeToggle">
+                                <label class="form-check-label" for="themeToggle"><i class="fas fa-moon"></i></label>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="stats">
@@ -394,6 +780,7 @@
                 this.todoTableBody = document.getElementById('todoTableBody');
                 this.paginationControls = document.getElementById('paginationControls');
                 this.toggleViewBtn = document.getElementById('toggleViewBtn');
+                this.themeToggle = document.getElementById('themeToggle');
 
 
                 this.init();
@@ -405,8 +792,37 @@
                     if (e.key === 'Enter') this.addTodo();
                 });
                 this.toggleViewBtn.addEventListener('click', () => this.toggleView());
+                this.themeToggle.addEventListener('change', () => this.toggleTheme());
+
+                // Check for saved theme preference
+                if (localStorage.getItem('theme') === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    this.themeToggle.checked = true;
+                    this.updateThemeIcon(true);
+                } else {
+                    this.updateThemeIcon(false);
+                }
+
 
                 this.updateDisplay();
+            }
+
+            toggleTheme() {
+                document.body.classList.toggle('dark-mode');
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+                this.updateThemeIcon(isDarkMode);
+            }
+
+            updateThemeIcon(isDarkMode) {
+                const icon = this.themeToggle.nextElementSibling.querySelector('i');
+                if (isDarkMode) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
             }
 
             toggleView() {
