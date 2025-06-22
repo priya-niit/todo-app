@@ -341,6 +341,32 @@
             color: var(--muted-text-dark) !important;
         }
 
+        .priority-indicator {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .priority-high .priority-indicator { color: #dc3545; } /* Red for High */
+        .priority-medium .priority-indicator { color: #ffc107; } /* Yellow for Medium */
+        .priority-low .priority-indicator { color: #0dcaf0; } /* Cyan for Low */
+
+        body.dark-mode .priority-high .priority-indicator { color: #f07178; }
+        body.dark-mode .priority-medium .priority-indicator { color: #ffdDAA; }
+        body.dark-mode .priority-low .priority-indicator { color: #78dce8; }
+
+        /* Style for table rows based on priority (optional, subtle background tint) */
+        .priority-high-row { border-left: 3px solid #dc3545 !important; }
+        .priority-medium-row { border-left: 3px solid #ffc107 !important; }
+        .priority-low-row { border-left: 3px solid #0dcaf0 !important; }
+
+        body.dark-mode .priority-high-row { border-left-color: #f07178 !important; }
+        body.dark-mode .priority-medium-row { border-left-color: #ffdDAA !important; }
+        body.dark-mode .priority-low-row { border-left-color: #78dce8 !important; }
+
+        .form-select-sm {
+            padding-top: 0.4rem; /* Align better with other inputs */
+            padding-bottom: 0.4rem;
+        }
+
 
         .todo-actions {
             display: flex;
@@ -740,10 +766,31 @@
                                 <input type="datetime-local" class="form-control todo-input" id="reminderTimeInput">
                             </div>
                         </div>
-                        <div class="text-end">
-                            <button class="btn btn-add" id="addBtn">
-                                <i class="fas fa-plus"></i> Add Task
-                            </button>
+                        <div class="row g-2 mb-3 align-items-end">
+                            <div class="col-md-8">
+                                <label for="priorityInput" class="form-label small mb-0">Priority:</label>
+                                <select class="form-select form-select-sm todo-input" id="priorityInput">
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <button class="btn btn-add w-100" id="addBtn">
+                                    <i class="fas fa-plus"></i> Add Task
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mb-3">
+                        <div class="col-md-4">
+                             <label for="sortOrder" class="form-label small mb-0">Sort by:</label>
+                            <select class="form-select form-select-sm" id="sortOrder">
+                                <option value="default" selected>Default</option>
+                                <option value="priority">Priority</option>
+                                <option value="dueDate">Due Date</option>
+                            </select>
                         </div>
                     </div>
 
@@ -792,9 +839,12 @@
                 this.currentView = 'list'; // 'list' or 'table'
                 this.currentPage = 1;
                 this.itemsPerPage = 5;
+                this.currentSortOrder = 'default'; // Added
 
 
-                this.reminderTimeInput = document.getElementById('reminderTimeInput'); // Added
+                this.reminderTimeInput = document.getElementById('reminderTimeInput');
+                this.priorityInput = document.getElementById('priorityInput'); // Added
+                this.sortOrderSelect = document.getElementById('sortOrder'); // Added
                 this.todoInput = document.getElementById('todoInput');
                 this.addBtn = document.getElementById('addBtn');
                 this.todoList = document.getElementById('todoList');
@@ -819,6 +869,7 @@
                 });
                 this.toggleViewBtn.addEventListener('click', () => this.toggleView());
                 this.themeToggle.addEventListener('change', () => this.toggleTheme());
+                this.sortOrderSelect.addEventListener('change', (e) => this.setSortOrder(e.target.value)); // Added
 
                 // Check for saved theme preference
                 if (localStorage.getItem('theme') === 'dark') {
@@ -835,6 +886,32 @@
 
                 this.updateDisplay();
             }
+
+            setSortOrder(sortOrder) {
+                this.currentSortOrder = sortOrder;
+                this.updateDisplay();
+            }
+
+            sortTodos() {
+                const priorityOrder = { high: 1, medium: 2, low: 3 };
+                this.todos.sort((a, b) => {
+                    if (this.currentSortOrder === 'priority') {
+                        const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+                        if (priorityDiff !== 0) return priorityDiff;
+                        return a.id - b.id; // Secondary sort by ID (creation order)
+                    } else if (this.currentSortOrder === 'dueDate') {
+                        const dateA = a.reminderTime ? new Date(a.reminderTime) : null;
+                        const dateB = b.reminderTime ? new Date(b.reminderTime) : null;
+                        if (dateA && dateB) return dateA - dateB;
+                        if (dateA) return -1; // Tasks with due dates come before those without
+                        if (dateB) return 1;
+                        return a.id - b.id; // Secondary sort for items without due dates
+                    } else { // default
+                        return a.id - b.id;
+                    }
+                });
+            }
+
 
             requestNotificationPermission() {
                 if (!('Notification' in window)) {
@@ -854,16 +931,24 @@
 
             checkReminders() {
                 const now = new Date();
+                let needsUpdate = false;
                 this.todos.forEach(todo => {
                     if (todo.reminderTime && !todo.completed && !todo.reminderTriggered) {
                         const reminderDateTime = new Date(todo.reminderTime);
                         if (reminderDateTime <= now) {
                             this.showNotification(todo);
                             todo.reminderTriggered = true;
-                            // No need to call updateDisplay here unless visual cue for triggered reminder is added
+                            // Auto-complete task
+                            if (!todo.completed) {
+                                this.toggleComplete(todo.id, true); // Pass a flag for auto-completion
+                                needsUpdate = true;
+                            }
                         }
                     }
                 });
+                if (needsUpdate) {
+                    this.updateDisplay(); // Update display if any task was auto-completed
+                }
             }
 
             showNotification(todo) {
@@ -909,6 +994,7 @@
             addTodo() {
                 const text = this.todoInput.value.trim();
                 const reminderTimeValue = this.reminderTimeInput.value;
+                const priorityValue = this.priorityInput.value;
 
                 if (!text) return;
 
@@ -918,19 +1004,27 @@
                     completed: false,
                     createdAt: new Date(),
                     reminderTime: reminderTimeValue ? new Date(reminderTimeValue).toISOString() : null,
-                    reminderTriggered: false
+                    reminderTriggered: false,
+                    priority: priorityValue || 'medium',
+                    isAutoCompleted: false
                 };
 
                 this.todos.push(todo);
                 this.todoInput.value = '';
-                this.reminderTimeInput.value = ''; // Clear reminder input
+                this.reminderTimeInput.value = '';
+                this.priorityInput.value = 'medium'; // Reset priority dropdown
                 this.updateDisplay();
             }
 
-            toggleComplete(id) {
+            toggleComplete(id, isAutoCompletion = false) {
                 const todo = this.todos.find(t => t.id === id);
                 if (todo) {
                     todo.completed = !todo.completed;
+                    if (todo.completed && isAutoCompletion) {
+                        todo.isAutoCompleted = true;
+                    } else if (!todo.completed) {
+                        todo.isAutoCompleted = false; // Reset if manually un-completed
+                    }
                     this.updateDisplay();
                 }
             }
@@ -945,7 +1039,7 @@
                 this.updateDisplay();
             }
 
-            saveEdit(id, newText, newReminderTime) {
+            saveEdit(id, newText, newReminderTime, newPriority) {
                 const todo = this.todos.find(t => t.id === id);
                 if (todo) {
                     if (newText.trim()) {
@@ -953,10 +1047,11 @@
                     }
                     const oldReminderTime = todo.reminderTime;
                     todo.reminderTime = newReminderTime ? new Date(newReminderTime).toISOString() : null;
-                    // If reminder time changed, reset triggered flag
                     if (todo.reminderTime !== oldReminderTime) {
                         todo.reminderTriggered = false;
+                        todo.isAutoCompleted = false; // Reset auto-completion if reminder changes
                     }
+                    todo.priority = newPriority || 'medium';
                 }
                 this.editingId = null;
                 this.updateDisplay();
@@ -993,8 +1088,13 @@
                                    class="form-control edit-input mb-2"
                                    id="editReminderInput${todo.id}"
                                    value="${reminderValue}">
+                            <select class="form-select form-select-sm edit-input mb-2" id="editPriorityInput${todo.id}">
+                                <option value="low" ${todo.priority === 'low' ? 'selected' : ''}>Low</option>
+                                <option value="medium" ${todo.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                                <option value="high" ${todo.priority === 'high' ? 'selected' : ''}>High</option>
+                            </select>
                             <div class="todo-actions">
-                                <button class="btn-action btn-save" onclick="todoApp.saveEdit(${todo.id}, document.getElementById('editInput${todo.id}').value, document.getElementById('editReminderInput${todo.id}').value)">
+                                <button class="btn-action btn-save" onclick="todoApp.saveEdit(${todo.id}, document.getElementById('editInput${todo.id}').value, document.getElementById('editReminderInput${todo.id}').value, document.getElementById('editPriorityInput${todo.id}').value)">
                                     <i class="fas fa-save"></i> Save
                                 </button>
                                 <button class="btn-action btn-cancel" onclick="todoApp.cancelEdit()">
@@ -1005,11 +1105,18 @@
                     `;
                 }
 
+                const priorityClass = `priority-${todo.priority}`;
+                const priorityIcon = todo.priority === 'high' ? 'fa-exclamation-circle' : todo.priority === 'medium' ? 'fa-circle' : 'fa-info-circle';
                 return `
-                    <li class="todo-item ${todo.completed ? 'completed' : ''}">
-                        <p class="todo-text">${todo.text}</p>
-                        ${todo.reminderTime ? `<p class="reminder-text small text-muted"><i class="fas fa-bell"></i> ${new Date(todo.reminderTime).toLocaleString()}</p>` : ''}
-                        <div class="todo-actions">
+                    <li class="todo-item ${todo.completed ? 'completed' : ''} ${priorityClass}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="todo-text mb-0">${todo.text}</p>
+                                ${todo.reminderTime ? `<p class="reminder-text small text-muted mb-1"><i class="fas fa-bell"></i> ${new Date(todo.reminderTime).toLocaleString()}</p>` : ''}
+                            </div>
+                            <span class="priority-indicator ms-2"><i class="fas ${priorityIcon}" title="Priority: ${todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1)}"></i></span>
+                        </div>
+                        <div class="todo-actions mt-2">
                             <button class="btn-action btn-complete" onclick="todoApp.toggleComplete(${todo.id})">
                                 <i class="fas fa-${todo.completed ? 'undo' : 'check'}"></i> 
                                 ${todo.completed ? 'Undo' : 'Complete'}
@@ -1027,6 +1134,7 @@
 
             updateDisplay() {
                 this.updateStats();
+                this.sortTodos(); // Sort todos before rendering
 
                 // Auto-switch logic
                 if (this.todos.length > 5 && this.currentView === 'list') {
@@ -1089,14 +1197,19 @@
                                 // For saving with Enter, we need to get both text and reminder values
                                 const textValue = activeEditInput.value;
                                 let reminderValue = null;
+                                let priorityValue = null;
                                 if (this.currentView === 'list') {
                                     const reminderInput = document.getElementById(`editReminderInput${this.editingId}`);
                                     if (reminderInput) reminderValue = reminderInput.value;
+                                    const prioritySelect = document.getElementById(`editPriorityInput${this.editingId}`);
+                                    if (prioritySelect) priorityValue = prioritySelect.value;
                                 } else { // table view
                                     const reminderInput = document.getElementById(`editReminderInputTable${this.editingId}`);
                                     if (reminderInput) reminderValue = reminderInput.value;
+                                    const prioritySelect = document.getElementById(`editPriorityInputTable${this.editingId}`);
+                                    if (prioritySelect) priorityValue = prioritySelect.value;
                                 }
-                                this.saveEdit(this.editingId, textValue, reminderValue);
+                                this.saveEdit(this.editingId, textValue, reminderValue, priorityValue);
                             } else if (e.key === 'Escape') {
                                 this.cancelEdit();
                             }
@@ -1124,8 +1237,13 @@
                                        class="form-control edit-input mb-2"
                                        id="editReminderInputTable${todo.id}"
                                        value="${reminderValue}">
+                                <select class="form-select form-select-sm edit-input mb-2" id="editPriorityInputTable${todo.id}">
+                                    <option value="low" ${todo.priority === 'low' ? 'selected' : ''}>Low</option>
+                                    <option value="medium" ${todo.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                                    <option value="high" ${todo.priority === 'high' ? 'selected' : ''}>High</option>
+                                </select>
                                 <div class="todo-actions mt-2">
-                                    <button class="btn-action btn-sm btn-save" onclick="todoApp.saveEdit(${todo.id}, document.getElementById('editInputTable${todo.id}').value, document.getElementById('editReminderInputTable${todo.id}').value)">
+                                    <button class="btn-action btn-sm btn-save" onclick="todoApp.saveEdit(${todo.id}, document.getElementById('editInputTable${todo.id}').value, document.getElementById('editReminderInputTable${todo.id}').value, document.getElementById('editPriorityInputTable${todo.id}').value)">
                                         <i class="fas fa-save"></i> Save
                                     </button>
                                     <button class="btn-action btn-sm btn-cancel" onclick="todoApp.cancelEdit()">
@@ -1137,11 +1255,14 @@
                     `;
                 }
 
+                const priorityClass = `priority-${todo.priority}`;
+                const priorityIcon = todo.priority === 'high' ? 'fa-exclamation-circle' : todo.priority === 'medium' ? 'fa-circle' : 'fa-info-circle';
                 return `
-                    <tr class="${todo.completed ? 'table-light' : ''}">
+                    <tr class="${todo.completed ? 'table-light' : ''} ${priorityClass}-row">
                         <td class="${todo.completed ? 'text-decoration-line-through text-muted' : ''}">
+                            <span class="priority-indicator me-2"><i class="fas ${priorityIcon}" title="Priority: ${todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1)}"></i></span>
                             ${todo.text}
-                            ${todo.reminderTime ? `<br><small class="reminder-text text-muted"><i class="fas fa-bell"></i> ${new Date(todo.reminderTime).toLocaleString()}</small>` : ''}
+                            ${todo.reminderTime ? `<br><small class="reminder-text text-muted ms-3"><i class="fas fa-bell"></i> ${new Date(todo.reminderTime).toLocaleString()}</small>` : ''}
                         </td>
                         <td>
                             <span class="badge ${todo.completed ? 'bg-success' : 'bg-warning'}">
