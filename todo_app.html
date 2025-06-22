@@ -233,6 +233,12 @@
         body.dark-mode .todo-input::placeholder {
             color: var(--muted-text-dark);
         }
+        input[type="datetime-local"] {
+            color-scheme: light; /* Default for light mode */
+        }
+        body.dark-mode input[type="datetime-local"] {
+            color-scheme: dark; /* Helps browser style the picker for dark mode */
+        }
 
 
         .todo-input:focus {
@@ -323,6 +329,18 @@
             word-wrap: break-word;
             transition: color var(--animation-duration) var(--animation-timing-function);
         }
+
+        .reminder-text {
+            margin-top: 0.25rem;
+            font-size: 0.8em !important; /* Ensure it's small */
+        }
+        .reminder-text i {
+            margin-right: 0.25em;
+        }
+        body.dark-mode .reminder-text {
+            color: var(--muted-text-dark) !important;
+        }
+
 
         .todo-actions {
             display: flex;
@@ -713,9 +731,16 @@
                     </div>
 
                     <div class="add-todo-form">
-                        <div class="d-flex gap-2">
-                            <input type="text" class="form-control todo-input" id="todoInput"
-                                placeholder="What needs to be done?" maxlength="200">
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-8">
+                                <input type="text" class="form-control todo-input" id="todoInput"
+                                    placeholder="What needs to be done?" maxlength="200">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="datetime-local" class="form-control todo-input" id="reminderTimeInput">
+                            </div>
+                        </div>
+                        <div class="text-end">
                             <button class="btn btn-add" id="addBtn">
                                 <i class="fas fa-plus"></i> Add Task
                             </button>
@@ -769,6 +794,7 @@
                 this.itemsPerPage = 5;
 
 
+                this.reminderTimeInput = document.getElementById('reminderTimeInput'); // Added
                 this.todoInput = document.getElementById('todoInput');
                 this.addBtn = document.getElementById('addBtn');
                 this.todoList = document.getElementById('todoList');
@@ -803,9 +829,58 @@
                     this.updateThemeIcon(false);
                 }
 
+                this.requestNotificationPermission();
+                setInterval(() => this.checkReminders(), 60000); // Check every minute
+
 
                 this.updateDisplay();
             }
+
+            requestNotificationPermission() {
+                if (!('Notification' in window)) {
+                    console.log('This browser does not support desktop notification');
+                    return;
+                }
+                if (Notification.permission !== 'denied' && Notification.permission !== 'granted') {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            console.log('Notification permission granted.');
+                        } else {
+                            console.log('Notification permission denied.');
+                        }
+                    });
+                }
+            }
+
+            checkReminders() {
+                const now = new Date();
+                this.todos.forEach(todo => {
+                    if (todo.reminderTime && !todo.completed && !todo.reminderTriggered) {
+                        const reminderDateTime = new Date(todo.reminderTime);
+                        if (reminderDateTime <= now) {
+                            this.showNotification(todo);
+                            todo.reminderTriggered = true;
+                            // No need to call updateDisplay here unless visual cue for triggered reminder is added
+                        }
+                    }
+                });
+            }
+
+            showNotification(todo) {
+                if (Notification.permission === 'granted') {
+                    const notification = new Notification('Todo Reminder!', {
+                        body: `Don't forget: ${todo.text}`,
+                        icon: './favicon.ico' // Optional: Add an icon
+                    });
+                    // Can add onclick event for notification if needed
+                } else if (Notification.permission !== 'denied') {
+                    // Re-request permission if it's default, as user might have missed the initial prompt
+                    // However, browsers might block repeated requests if not user-initiated.
+                    // For simplicity, we rely on the initial request.
+                    console.log('Notification permission not granted. Cannot show notification.');
+                }
+            }
+
 
             toggleTheme() {
                 document.body.classList.toggle('dark-mode');
@@ -833,17 +908,22 @@
 
             addTodo() {
                 const text = this.todoInput.value.trim();
+                const reminderTimeValue = this.reminderTimeInput.value;
+
                 if (!text) return;
 
                 const todo = {
                     id: this.nextId++,
                     text: text,
                     completed: false,
-                    createdAt: new Date()
+                    createdAt: new Date(),
+                    reminderTime: reminderTimeValue ? new Date(reminderTimeValue).toISOString() : null,
+                    reminderTriggered: false
                 };
 
                 this.todos.push(todo);
                 this.todoInput.value = '';
+                this.reminderTimeInput.value = ''; // Clear reminder input
                 this.updateDisplay();
             }
 
@@ -865,10 +945,18 @@
                 this.updateDisplay();
             }
 
-            saveEdit(id, newText) {
+            saveEdit(id, newText, newReminderTime) {
                 const todo = this.todos.find(t => t.id === id);
-                if (todo && newText.trim()) {
-                    todo.text = newText.trim();
+                if (todo) {
+                    if (newText.trim()) {
+                        todo.text = newText.trim();
+                    }
+                    const oldReminderTime = todo.reminderTime;
+                    todo.reminderTime = newReminderTime ? new Date(newReminderTime).toISOString() : null;
+                    // If reminder time changed, reset triggered flag
+                    if (todo.reminderTime !== oldReminderTime) {
+                        todo.reminderTriggered = false;
+                    }
                 }
                 this.editingId = null;
                 this.updateDisplay();
@@ -893,15 +981,20 @@
                 const isEditing = this.editingId === todo.id;
 
                 if (isEditing) {
+                    const reminderValue = todo.reminderTime ? new Date(new Date(todo.reminderTime).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
                     return `
                         <li class="todo-item">
                             <input type="text" 
-                                   class="edit-input" 
+                                   class="form-control edit-input mb-2"
                                    value="${todo.text}" 
                                    id="editInput${todo.id}"
                                    maxlength="200">
+                            <input type="datetime-local"
+                                   class="form-control edit-input mb-2"
+                                   id="editReminderInput${todo.id}"
+                                   value="${reminderValue}">
                             <div class="todo-actions">
-                                <button class="btn-action btn-save" onclick="todoApp.saveEdit(${todo.id}, document.getElementById('editInput${todo.id}').value)">
+                                <button class="btn-action btn-save" onclick="todoApp.saveEdit(${todo.id}, document.getElementById('editInput${todo.id}').value, document.getElementById('editReminderInput${todo.id}').value)">
                                     <i class="fas fa-save"></i> Save
                                 </button>
                                 <button class="btn-action btn-cancel" onclick="todoApp.cancelEdit()">
@@ -915,6 +1008,7 @@
                 return `
                     <li class="todo-item ${todo.completed ? 'completed' : ''}">
                         <p class="todo-text">${todo.text}</p>
+                        ${todo.reminderTime ? `<p class="reminder-text small text-muted"><i class="fas fa-bell"></i> ${new Date(todo.reminderTime).toLocaleString()}</p>` : ''}
                         <div class="todo-actions">
                             <button class="btn-action btn-complete" onclick="todoApp.toggleComplete(${todo.id})">
                                 <i class="fas fa-${todo.completed ? 'undo' : 'check'}"></i> 
@@ -992,7 +1086,17 @@
                         activeEditInput.onkeypress = null;
                         activeEditInput.onkeypress = (e) => {
                             if (e.key === 'Enter') {
-                                this.saveEdit(this.editingId, activeEditInput.value);
+                                // For saving with Enter, we need to get both text and reminder values
+                                const textValue = activeEditInput.value;
+                                let reminderValue = null;
+                                if (this.currentView === 'list') {
+                                    const reminderInput = document.getElementById(`editReminderInput${this.editingId}`);
+                                    if (reminderInput) reminderValue = reminderInput.value;
+                                } else { // table view
+                                    const reminderInput = document.getElementById(`editReminderInputTable${this.editingId}`);
+                                    if (reminderInput) reminderValue = reminderInput.value;
+                                }
+                                this.saveEdit(this.editingId, textValue, reminderValue);
                             } else if (e.key === 'Escape') {
                                 this.cancelEdit();
                             }
@@ -1005,18 +1109,23 @@
                 const isEditing = this.editingId === todo.id;
 
                 if (isEditing) {
+                    const reminderValue = todo.reminderTime ? new Date(new Date(todo.reminderTime).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
                     // For table view, editing will replace the row content with an input field.
                     // We'll need a specific ID for the table edit input.
                     return `
                         <tr>
                             <td colspan="3">
                                 <input type="text"
-                                       class="form-control edit-input"
+                                       class="form-control edit-input mb-2"
                                        value="${todo.text}"
                                        id="editInputTable${todo.id}"
                                        maxlength="200">
+                                <input type="datetime-local"
+                                       class="form-control edit-input mb-2"
+                                       id="editReminderInputTable${todo.id}"
+                                       value="${reminderValue}">
                                 <div class="todo-actions mt-2">
-                                    <button class="btn-action btn-sm btn-save" onclick="todoApp.saveEdit(${todo.id}, document.getElementById('editInputTable${todo.id}').value)">
+                                    <button class="btn-action btn-sm btn-save" onclick="todoApp.saveEdit(${todo.id}, document.getElementById('editInputTable${todo.id}').value, document.getElementById('editReminderInputTable${todo.id}').value)">
                                         <i class="fas fa-save"></i> Save
                                     </button>
                                     <button class="btn-action btn-sm btn-cancel" onclick="todoApp.cancelEdit()">
@@ -1030,7 +1139,10 @@
 
                 return `
                     <tr class="${todo.completed ? 'table-light' : ''}">
-                        <td class="${todo.completed ? 'text-decoration-line-through text-muted' : ''}">${todo.text}</td>
+                        <td class="${todo.completed ? 'text-decoration-line-through text-muted' : ''}">
+                            ${todo.text}
+                            ${todo.reminderTime ? `<br><small class="reminder-text text-muted"><i class="fas fa-bell"></i> ${new Date(todo.reminderTime).toLocaleString()}</small>` : ''}
+                        </td>
                         <td>
                             <span class="badge ${todo.completed ? 'bg-success' : 'bg-warning'}">
                                 ${todo.completed ? 'Completed' : 'Pending'}
