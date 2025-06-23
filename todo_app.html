@@ -368,78 +368,47 @@
             font-size: 0.9em; /* Match other small form elements if any */
         }
 
-        /* Priority Button Group Styling */
-        .btn-group .btn-priority {
-            --bs-btn-border-width: 1px; /* Ensure Bootstrap variable is there if we customize border */
-            border-color: var(--input-border-light);
+        /* Custom styling for all select elements for consistency */
+        .form-select {
             background-color: var(--todo-item-bg-light);
             color: var(--text-color-light);
-            transition: background-color var(--animation-duration) var(--animation-timing-function),
+            border: 1px solid var(--input-border-light);
+            border-radius: 12px; /* Match .btn-add */
+            transition: border-color var(--animation-duration) var(--animation-timing-function),
+                        background-color var(--animation-duration) var(--animation-timing-function),
                         color var(--animation-duration) var(--animation-timing-function),
-                        border-color var(--animation-duration) var(--animation-timing-function),
                         box-shadow var(--animation-duration) var(--animation-timing-function);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); /* Default Bootstrap arrow, themed later */
         }
-        body.dark-mode .btn-group .btn-priority {
-            border-color: var(--input-border-dark);
+
+        body.dark-mode .form-select {
             background-color: var(--todo-item-bg-dark);
             color: var(--text-color-dark);
+            border-color: var(--input-border-dark);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ced4da' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); /* Dark mode arrow */
         }
 
-        .btn-group .btn-priority:hover {
-            background-color: var(--card-bg-light); /* Slightly different hover from plain item */
-            z-index: 2; /* Bring to front on hover */
+        .form-select:focus {
+            border-color: var(--input-focus-border-light);
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(102, 166, 255, 0.25); /* Match input focus */
         }
-        body.dark-mode .btn-group .btn-priority:hover {
-            background-color: var(--card-bg-dark);
-        }
-
-        .btn-group .btn-priority.active {
-            z-index: 3; /* Active button on top */
-            color: white; /* High contrast for active text */
+        body.dark-mode .form-select:focus {
+            border-color: var(--input-focus-border-dark);
+            box-shadow: 0 0 0 0.2rem rgba(130, 170, 255, 0.25); /* Match input focus for dark */
         }
 
-        .btn-priority[data-priority="low"].active {
-            background-color: #0dcaf0; /* Cyan */
-            border-color: #0dcaf0;
-        }
-        body.dark-mode .btn-priority[data-priority="low"].active {
-            background-color: #2596be; /* Darker Cyan */
-            border-color: #2596be;
-            color: var(--text-color-dark);
-        }
+        /* Remove .todo-input from #priorityInput to avoid conflicts */
+        /* The #priorityInput will now use .form-select and .form-select-sm */
 
-        .btn-priority[data-priority="medium"].active {
-            background-color: #ffc107; /* Yellow */
-            border-color: #ffc107;
-            color: #333; /* Darker text for yellow */
+        /* Ensure .edit-input applied to select in edit mode also looks consistent */
+        select.edit-input { /* More specific selector if needed */
+            padding: 0.5rem; /* Override form-select-sm for edit inputs if they are larger */
+            font-size: 1.1rem; /* Match other edit inputs */
+             /* Other .edit-input styles (border, bg, color) are already variable-based */
         }
-        body.dark-mode .btn-priority[data-priority="medium"].active {
-            background-color: #cca300; /* Darker Yellow */
-            border-color: #cca300;
-            color: var(--text-color-light); /* Light text for dark yellow */
-        }
-
-        .btn-priority[data-priority="high"].active {
-            background-color: #dc3545; /* Red */
-            border-color: #dc3545;
-        }
-        body.dark-mode .btn-priority[data-priority="high"].active {
-            background-color: #b02a37; /* Darker Red */
-            border-color: #b02a37;
-        }
-
-        /* Ensure consistent sizing for priority buttons in edit forms (btn-sm) */
-        .edit-priority-group .btn-priority.btn-sm {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.875rem; /* Standard BS sm button font size */
-        }
-
-        /* Select elements will now use Bootstrap's default .form-select styling.
-           Any .edit-input class on a select will primarily affect font-size if not overridden by .form-select.
-           Bootstrap's own :root variables and theme handling will manage dark mode for selects.
-        */
-        select.edit-input {
-           font-size: 1.1rem; /* Match other .edit-input fields, Bootstrap will handle other select styles */
+        body.dark-mode select.edit-input {
+            /* Dark mode specific overrides for edit-input selects if needed */
         }
 
 
@@ -841,16 +810,17 @@
                                 <input type="datetime-local" class="form-control todo-input" id="reminderTimeInput">
                             </div>
                         </div>
-                        <div class="row g-2 mb-3 align-items-center">
-                            <div class="col-md-8">
-                                <label for="priorityInput" class="form-label small mb-1">Priority:</label>
-                                <select class="form-select form-select-sm todo-input" id="priorityInput"> {/* Restored todo-input, id was #priorityInput before button group */}
+                        <div class="row g-2 mb-3 align-items-end">
+                            <div class="col-md-3">
+                                <label for="priorityInput" class="form-label small mb-0">Priority:</label>
+                                <select class="form-select form-select-sm" id="priorityInput"> {/* Removed todo-input class */}
                                     <option value="low">Low</option>
                                     <option value="medium" selected>Medium</option>
                                     <option value="high">High</option>
                                 </select>
                             </div>
-                            <div class="col-md-4 text-end mt-auto">
+                            <div class="col-md-5"></div>
+                            <div class="col-md-4 text-end">
                                 <button class="btn btn-add w-100" id="addBtn">
                                     <i class="fas fa-plus"></i> Add Task
                                 </button>
@@ -859,7 +829,7 @@
                     </div>
 
                     <div class="d-flex justify-content-end mb-3">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                              <label for="sortOrder" class="form-label small mb-0">Sort by:</label>
                             <select class="form-select form-select-sm" id="sortOrder">
                                 <option value="default" selected>Default</option>
@@ -918,8 +888,8 @@
 
 
                 this.reminderTimeInput = document.getElementById('reminderTimeInput');
-                this.priorityInputGroup = document.getElementById('priorityInputGroup'); // Changed from priorityInput
-                this.sortOrderSelect = document.getElementById('sortOrder');
+                this.priorityInput = document.getElementById('priorityInput'); // Added
+                this.sortOrderSelect = document.getElementById('sortOrder'); // Added
                 this.todoInput = document.getElementById('todoInput');
                 this.addBtn = document.getElementById('addBtn');
                 this.todoList = document.getElementById('todoList');
@@ -944,9 +914,7 @@
                 });
                 this.toggleViewBtn.addEventListener('click', () => this.toggleView());
                 this.themeToggle.addEventListener('change', () => this.toggleTheme());
-                this.sortOrderSelect.addEventListener('change', (e) => this.setSortOrder(e.target.value));
-
-                this.priorityInputGroup.addEventListener('click', (e) => this.handlePriorityGroupClick(e, this.priorityInputGroup));
+                this.sortOrderSelect.addEventListener('change', (e) => this.setSortOrder(e.target.value)); // Added
 
                 // Check for saved theme preference
                 if (localStorage.getItem('theme') === 'dark') {
@@ -1071,7 +1039,7 @@
             addTodo() {
                 const text = this.todoInput.value.trim();
                 const reminderTimeValue = this.reminderTimeInput.value;
-                const priorityValue = this.getActivePriorityFromGroup('priorityInputGroup');
+                const priorityValue = this.priorityInput.value;
 
                 if (!text) return;
 
@@ -1082,44 +1050,16 @@
                     createdAt: new Date(),
                     reminderTime: reminderTimeValue ? new Date(reminderTimeValue).toISOString() : null,
                     reminderTriggered: false,
-                    priority: priorityValue || 'medium', // Default to medium if somehow none is active
+                    priority: priorityValue || 'medium',
                     isAutoCompleted: false
                 };
 
                 this.todos.push(todo);
                 this.todoInput.value = '';
                 this.reminderTimeInput.value = '';
-                // Reset priority button group to medium
-                this.setActivePriorityInGroup('priorityInputGroup', 'medium');
+                this.priorityInput.value = 'medium'; // Reset priority dropdown
                 this.updateDisplay();
             }
-
-            getActivePriorityFromGroup(groupId) {
-                const group = document.getElementById(groupId);
-                if (!group) return 'medium'; // Fallback
-                const activeButton = group.querySelector('.btn-priority.active');
-                return activeButton ? activeButton.dataset.priority : 'medium';
-            }
-
-            setActivePriorityInGroup(groupId, priorityToSet) {
-                const group = document.getElementById(groupId);
-                if (!group) return;
-                group.querySelectorAll('.btn-priority').forEach(btn => {
-                    btn.classList.remove('active');
-                    if (btn.dataset.priority === priorityToSet) {
-                        btn.classList.add('active');
-                    }
-                });
-            }
-
-            handlePriorityGroupClick(event, groupElement) {
-                const targetButton = event.target.closest('.btn-priority');
-                if (!targetButton) return;
-
-                groupElement.querySelectorAll('.btn-priority').forEach(btn => btn.classList.remove('active'));
-                targetButton.classList.add('active');
-            }
-
 
             toggleComplete(id, isAutoCompletion = false) {
                 const todo = this.todos.find(t => t.id === id);
@@ -1297,39 +1237,28 @@
                         activeEditInput.select();
                         // Remove previous listener to avoid multiple triggers if any
                         activeEditInput.onkeypress = null;
-                        activeEditInput.addEventListener('keypress', (e) => { // Changed to addEventListener
+                        activeEditInput.onkeypress = (e) => {
                             if (e.key === 'Enter') {
+                                // For saving with Enter, we need to get both text and reminder values
                                 const textValue = activeEditInput.value;
-                                let reminderValue = null;
-                                let priorityValue = null;
-                                if (this.currentView === 'list') {
                                 let reminderValue = null;
                                 let priorityValue = null;
                                 if (this.currentView === 'list') {
                                     const reminderInput = document.getElementById(`editReminderInput${this.editingId}`);
                                     if (reminderInput) reminderValue = reminderInput.value;
-                                    priorityValue = this.getActivePriorityFromGroup(`editPriorityInputGroup${this.editingId}`);
+                                    const prioritySelect = document.getElementById(`editPriorityInput${this.editingId}`);
+                                    if (prioritySelect) priorityValue = prioritySelect.value;
                                 } else { // table view
                                     const reminderInput = document.getElementById(`editReminderInputTable${this.editingId}`);
                                     if (reminderInput) reminderValue = reminderInput.value;
-                                    priorityValue = this.getActivePriorityFromGroup(`editPriorityInputGroupTable${this.editingId}`);
+                                    const prioritySelect = document.getElementById(`editPriorityInputTable${this.editingId}`);
+                                    if (prioritySelect) priorityValue = prioritySelect.value;
                                 }
                                 this.saveEdit(this.editingId, textValue, reminderValue, priorityValue);
                             } else if (e.key === 'Escape') {
                                 this.cancelEdit();
                             }
-                        });
-                    }
-                     // Add event listeners for newly rendered priority button groups in edit mode
-                    if (this.editingId) {
-                        const editGroupList = document.getElementById(`editPriorityInputGroup${this.editingId}`);
-                        if (editGroupList) {
-                            editGroupList.addEventListener('click', (e) => this.handlePriorityGroupClick(e, editGroupList));
-                        }
-                        const editGroupTable = document.getElementById(`editPriorityInputGroupTable${this.editingId}`);
-                        if (editGroupTable) {
-                            editGroupTable.addEventListener('click', (e) => this.handlePriorityGroupClick(e, editGroupTable));
-                        }
+                        };
                     }
                 }
             }
