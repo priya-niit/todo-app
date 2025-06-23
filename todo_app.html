@@ -434,48 +434,12 @@
             font-size: 0.875rem; /* Standard BS sm button font size */
         }
 
-
-        /* Custom styling for all select elements for consistency */
-        .form-select {
-            background-color: var(--todo-item-bg-light);
-            color: var(--text-color-light);
-            border: 1px solid var(--input-border-light);
-            border-radius: 12px; /* Match .btn-add */
-            transition: border-color var(--animation-duration) var(--animation-timing-function),
-                        background-color var(--animation-duration) var(--animation-timing-function),
-                        color var(--animation-duration) var(--animation-timing-function),
-                        box-shadow var(--animation-duration) var(--animation-timing-function);
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); /* Default Bootstrap arrow, themed later */
-        }
-
-        body.dark-mode .form-select {
-            background-color: var(--todo-item-bg-dark);
-            color: var(--text-color-dark);
-            border-color: var(--input-border-dark);
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ced4da' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); /* Dark mode arrow */
-        }
-
-        .form-select:focus {
-            border-color: var(--input-focus-border-light);
-            outline: 0;
-            box-shadow: 0 0 0 0.2rem rgba(102, 166, 255, 0.25); /* Match input focus */
-        }
-        body.dark-mode .form-select:focus {
-            border-color: var(--input-focus-border-dark);
-            box-shadow: 0 0 0 0.2rem rgba(130, 170, 255, 0.25); /* Match input focus for dark */
-        }
-
-        /* Remove .todo-input from #priorityInput to avoid conflicts */
-        /* The #priorityInput will now use .form-select and .form-select-sm */
-
-        /* Ensure .edit-input applied to select in edit mode also looks consistent */
-        select.edit-input { /* More specific selector if needed */
-            padding: 0.5rem; /* Override form-select-sm for edit inputs if they are larger */
-            font-size: 1.1rem; /* Match other edit inputs */
-             /* Other .edit-input styles (border, bg, color) are already variable-based */
-        }
-        body.dark-mode select.edit-input {
-            /* Dark mode specific overrides for edit-input selects if needed */
+        /* Select elements will now use Bootstrap's default .form-select styling.
+           Any .edit-input class on a select will primarily affect font-size if not overridden by .form-select.
+           Bootstrap's own :root variables and theme handling will manage dark mode for selects.
+        */
+        select.edit-input {
+           font-size: 1.1rem; /* Match other .edit-input fields, Bootstrap will handle other select styles */
         }
 
 
@@ -877,16 +841,16 @@
                                 <input type="datetime-local" class="form-control todo-input" id="reminderTimeInput">
                             </div>
                         </div>
-                        <div class="row g-2 mb-3 align-items-center"> {/* Changed align-items-end to align-items-center for better label vertical align */}
+                        <div class="row g-2 mb-3 align-items-center">
                             <div class="col-md-8">
-                                <label class="form-label small mb-1">Priority:</label> {/* Adjusted label margin */}
-                                <div class="btn-group w-100" role="group" aria-label="Priority selection" id="priorityInputGroup">
-                                    <button type="button" class="btn btn-priority" data-priority="low">Low</button>
-                                    <button type="button" class="btn btn-priority active" data-priority="medium">Medium</button> {/* Default active */}
-                                    <button type="button" class="btn btn-priority" data-priority="high">High</button>
-                                </div>
+                                <label for="priorityInput" class="form-label small mb-1">Priority:</label>
+                                <select class="form-select form-select-sm todo-input" id="priorityInput"> {/* Restored todo-input, id was #priorityInput before button group */}
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                </select>
                             </div>
-                            <div class="col-md-4 text-end mt-auto"> {/* Added mt-auto to push button to bottom if row height increases */}
+                            <div class="col-md-4 text-end mt-auto">
                                 <button class="btn btn-add w-100" id="addBtn">
                                     <i class="fas fa-plus"></i> Add Task
                                 </button>
